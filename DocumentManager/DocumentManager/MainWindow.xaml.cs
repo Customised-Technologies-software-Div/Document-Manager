@@ -26,6 +26,7 @@ using DocumentManager.com.Utility;
 using DocumentManager.com.dl;
 using DocumentManager.com.exception;
 using System.Threading;
+using System.ComponentModel;
 
 namespace DocumentManager
 {
@@ -37,22 +38,209 @@ namespace DocumentManager
         private OleDbConnection connection = null;
         private OleDbCommand command = null;
         private OleDbDataReader reader = null;
-        private string documentFolderPath = @"E:\Vinay\Training\Document Manager\DocMgr Files\";
-        private string saveFolderPath= @"E:\Vinay\Training\Document Manager\Reports\";
-        private string _SerialNumber = "S025";
-        private string _ReferenceNumber = "B";
+        //private string documentFolderPath = @"E:\Vinay\Training\Document Manager\DocMgr Files\";
+        //private string saveFolderPath= @"E:\Vinay\Training\Document Manager\Reports\";
+        //private string _SerialNumber = "S025";
+        //private string _ReferenceNumber = "B";
         private AddressBuffer addressBuffer;
         public MainWindow()
         {
             InitializeComponent();
             populateCompaniesCmb();
-            txtFolderPath.Text = documentFolderPath;
-            populateTemplateFoldersCmb();
+            populateSettings();
             txtDate.Text = DateTime.Now.ToString("dd/MM/yyyy");
             setCompanyViewMode();
             setViewAddressMode();
-            cmbCompanies.SelectedIndex = 1;
         }
+        private void populateCompaniesCmb()
+        {
+            try
+            {
+                DataLayer dl = new DataLayer();
+                Response res = dl.GetAllCompanies();
+                if (res.success)
+                {
+                    List<Company> companies = (List<Company>)res.body;
+                    cmbCompanies.ItemsSource = null;
+                    //for (int i = 0; i < companies.Count; i++) Trace.WriteLine(companies[i].companyName);
+                    cmbCompanies.ItemsSource = companies;
+                    cmbCompanies.DisplayMemberPath = "companyName";
+                    cmbCompanies.SelectionChanged += cmbCompaniesSelectionChanged;
+                    cmbCompanies.SelectedIndex = 1;
+                }
+                else if (res.isException)
+                {
+                    MessageBox.Show("Exception while populating companies : " + res.exception);
+                }
+            }
+            catch (Exception exception)
+            {
+                MessageBox.Show("Exception in populate companies cmb : " + exception);
+            }
+        }
+        private void cmbCompaniesSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            Response res;
+            DataLayer dl = new DataLayer();
+            try
+            {
+                if (cmbCompanies.SelectedIndex == -1) return;
+                Company company = (Company)cmbCompanies.SelectedItem;
+                PopulateFilePaths();
+                setAddressComponent(company.companyId);
+                populateContacts(company.companyId);
+            }
+            catch (Exception exception)
+            {
+                MessageBox.Show("Exception while selecting company " + exception);
+            }
+        }
+        private void setAddressComponent(int companyId)
+        {
+            DataLayer dl = new DataLayer();
+            Response res = dl.GetAddressByCompanyId(companyId);
+            if (res.success)
+            {
+                List<Address> addresses = (List<Address>)res.body;
+                addressBuffer = new AddressBuffer(addresses);
+                emptyAllAddressFields();
+                if (addressBuffer.GetSize() != 0)
+                {
+                    Address address = addressBuffer.GetCurrentAddress();
+                    FillAddress(address);
+                }
+                setAddressPanel();
+            }
+            else if (res.isException)
+            {
+                MessageBox.Show("Point 2 : " + res.exception);
+            }
+        }
+
+        private void populateContacts(int companyId)
+        {
+            DataLayer dl = new DataLayer();
+            Response res = dl.GetContactsByCompanyId(companyId);
+            if (res.success)
+            {
+                List<Contact> contacts = (List<Contact>)res.body;
+                gridContacts.ItemsSource = contacts;
+                // At every time we are changing value of Item source, we have to hide columns we want to hide.
+                if (gridContacts.Columns.Count > 2)
+                {
+                    gridContacts.Columns[0].Visibility = Visibility.Collapsed;
+                    gridContacts.Columns[1].Visibility = Visibility.Collapsed;
+                }
+                setAllColumnsOfSameWidth();
+
+                if (contacts.Count > 0) gridContacts.SelectedIndex = 0;
+            }
+            else if (res.isException)
+            {
+                MessageBox.Show("Point 3 : " + res.exception);
+            }
+        }
+        private Company getCurrentSelectedCompany()
+        {
+            return (Company)cmbCompanies.SelectedItem;
+        }
+
+        public void populateSettings()
+        {
+            DataLayer dl = new DataLayer();
+            Response res = dl.GetSettings();
+            if(res.success)
+            {
+                Settings settings = (Settings)res.body;
+                txtTemplateFolderPath.Text = settings.templateRoot;
+                txtRef.Text = settings.refName;
+                txtDocumentFolderPath.Text = settings.docRoot;
+                populateTemplateFoldersCmb();
+            }
+            else if(res.isException)
+            {
+                MessageBox.Show(res.exception);
+            }
+        }
+        private void populateTemplateFoldersCmb()
+        {
+            try
+            {
+                cmbTemplateFiles.ItemsSource = null;
+                cmbTemplateFolders.Items.Clear();
+
+                string[] subdirectoryEntries = Directory.GetDirectories(txtTemplateFolderPath.Text.ToString());
+
+                
+                // Loop through them to see if they have any other subdirectories
+                foreach (string subdirectory in subdirectoryEntries)
+                {
+                    string folderName = System.IO.Path.GetFileName(subdirectory);
+                    cmbTemplateFolders.Items.Add(folderName);
+                }
+                cmbTemplateFolders.SelectionChanged += cmbTemplateFolderSelectionChanged;
+                if (cmbTemplateFolders.SelectedIndex == -1) cmbTemplateFolders.SelectedIndex = 0;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Exception : Populate Template Folder : " + ex.Message);
+            }
+        }
+
+        private void cmbTemplateFolderSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            if (cmbTemplateFolders.SelectedItem == null)
+            {
+                cmbTemplateFiles.Items.Clear();
+                //gridDocuments.Items.Clear();
+                return;
+            }
+            populateTemplateFiles(cmbTemplateFolders.SelectedItem.ToString());
+            populateDocumentsDataGrid(cmbTemplateFolders.SelectedItem.ToString());
+        }
+        private void populateTemplateFiles(string docType)
+        {
+            try
+            {
+                String folderName = docType;
+                string[] fileEntries = Directory.GetFiles(txtTemplateFolderPath.Text + "\\" + folderName);
+                cmbTemplateFiles.Items.Clear();
+                foreach (var file_name in fileEntries)
+                {
+                    cmbTemplateFiles.Items.Add(System.IO.Path.GetFileName(file_name));
+                }
+                cmbTemplateFiles.SelectedIndex = 0;
+                txtTemplateFilePath.Text = fileEntries[0];
+            }
+            catch (NullReferenceException nre)
+            {
+                MessageBox.Show(nre.Message);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+        private void cmbTemplateFilesSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            try
+            {
+                PopulateFilePaths();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+        private void PopulateFilePaths()
+        {
+            if (cmbTemplateFolders.SelectedIndex == -1 || cmbTemplateFiles.SelectedIndex == -1 || getCurrentSelectedCompany()==null) return;
+            txtTemplateFilePath.Text = txtTemplateFolderPath.Text + "\\"+ cmbTemplateFolders.SelectedItem.ToString() + "\\" + cmbTemplateFiles.SelectedItem.ToString();
+            FileInfo fileInfo = new FileInfo(txtTemplateFilePath.Text);
+
+            txtSaveFilePath.Text = txtDocumentFolderPath.Text + "\\" + getCurrentSelectedCompany().companyName + "\\" + cmbTemplateFolders.SelectedItem.ToString() + txtDocumentSerialNumber.Text + txtRef.Text + fileInfo.Extension ;
+        }
+
         public void setCompanyAddMode()
         {
             cmbCompanies.Visibility = Visibility.Collapsed;
@@ -85,7 +273,7 @@ namespace DocumentManager
         private void btnAddCompanyDetails_Click(object sender, RoutedEventArgs e)
         {
             Button btn = e.Source as Button;
-            if (btn.Content == "Add")
+            if (btn.Content.ToString() == "Add")
             {
                 btn.Content = "OK";
                 setCompanyAddMode();
@@ -123,7 +311,7 @@ namespace DocumentManager
                 return;
             }
             Button btn = e.Source as Button;
-            if (btn.Content == "Edit")
+            if (btn.Content.ToString() == "Edit")
             {
                 btn.Content = "OK";
                 setCompanyEditMode();
@@ -332,115 +520,7 @@ namespace DocumentManager
             }
         }
 
-        private void populateTemplateFoldersCmb()
-        {
-            try
-            {
-                string[] subdirectoryEntries = Directory.GetDirectories(txtFolderPath.Text.ToString());
 
-                cmbTemplateFolders.Items.Clear();
-
-                // Loop through them to see if they have any other subdirectories
-                foreach (string subdirectory in subdirectoryEntries)
-                {
-                    string folderName=System.IO.Path.GetFileName(subdirectory);
-                    cmbTemplateFolders.Items.Add(folderName);
-                }
-                cmbTemplateFolders.SelectionChanged += cmbTemplateSelectionChanged;
-                if (cmbTemplateFolders.SelectedIndex == -1) cmbTemplateFolders.SelectedIndex = 0;
-            }
-            catch (DAOException ex)
-            {
-                MessageBox.Show("Exception : Populate Companies : " + ex.Message);
-            }
-
-        }
-
-        private void cmbTemplateSelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            try
-            {
-                if(cmbTemplateFolders.SelectedItem==null)
-                {
-                    cmbTemplateFiles.Items.Clear();
-                    return;
-                }
-                String folderName = cmbTemplateFolders.SelectedItem.ToString();
-                string[] fileEntries = Directory.GetFiles(documentFolderPath + folderName);
-                cmbTemplateFiles.Items.Clear();
-                foreach (var file_name in fileEntries)
-                {
-                    cmbTemplateFiles.Items.Add(System.IO.Path.GetFileName(file_name));
-                }
-                cmbTemplateFiles.SelectedIndex = 0;
-            }catch(NullReferenceException nre)
-            {
-                MessageBox.Show(nre.Message);
-            }
-            catch(Exception ex)
-            {
-                MessageBox.Show(ex.Message);
-            }
-
-        }
-
-        private void setAddressComponent(int companyId)
-        {
-            DataLayer dl = new DataLayer();
-            Response res = dl.GetAddressByCompanyId(companyId);
-            if (res.success)
-            {
-                List<Address> addresses = (List<Address>)res.body;
-                addressBuffer = new AddressBuffer(addresses);
-                emptyAllAddressFields();
-                if (addressBuffer.GetSize() != 0)
-                {
-                    Address address = addressBuffer.GetCurrentAddress();
-                    FillAddress(address);
-                }
-                setAddressPanel();
-            }
-            else if (res.isException)
-            {
-                MessageBox.Show("Point 2 : " + res.exception);
-            }
-        }
-
-        private Company getCurrentSelectedCompany()
-        {
-            return (Company)cmbCompanies.SelectedItem;
-        }
-        private void cmbCompaniesSelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            Response res;
-            DataLayer dl = new DataLayer();
-            try
-            {
-                if (cmbCompanies.SelectedIndex == -1) return;
-                Company company = (Company) cmbCompanies.SelectedItem;
-                setAddressComponent(company.companyId);
-                populateContacts(company.companyId);
-            }
-            catch(Exception exception)
-            {
-                MessageBox.Show("Exception while selecting company " + exception);
-            }
-        }
-        private void populateContacts(int companyId)
-        {
-            DataLayer dl = new DataLayer();
-            Response res = dl.GetContactsByCompanyId(companyId);
-            if (res.success)
-            {
-                List<Contact> contacts = (List<Contact>)res.body;
-                gridContacts.ItemsSource = contacts;
-                if(contacts.Count>0) gridContacts.SelectedIndex = 0;
-            }
-            else if (res.isException)
-            {
-                MessageBox.Show("Point 3 : " + res.exception);
-            }
-        }
         private void emptyAllAddressFields()
         {
             txtAddress1.Text = "";
@@ -518,30 +598,6 @@ namespace DocumentManager
                     btnNext.IsEnabled = true;
             }
         }
-        private void populateCompaniesCmb()
-        {
-            try
-            {
-                DataLayer dl = new DataLayer();
-                Response res = dl.GetAllCompanies();
-                if (res.success)
-                {
-                    List<Company> companies = (List<Company>)res.body;
-                    cmbCompanies.ItemsSource = null;
-                    for (int i = 0; i < companies.Count; i++) Trace.WriteLine(companies[i].companyName);
-                    cmbCompanies.ItemsSource = companies;
-                    cmbCompanies.DisplayMemberPath = "companyName";
-                    cmbCompanies.SelectionChanged += cmbCompaniesSelectionChanged;
-                }
-                else if(res.isException)
-                {
-                    MessageBox.Show("Exception while populating companies : " + res.exception);
-                }
-            }catch(Exception exception)
-            {
-                MessageBox.Show("Exception in populate companies cmb : " + exception);
-            }
-        }
 
         private void Generate_Click(object sender, RoutedEventArgs e)
         {
@@ -558,11 +614,17 @@ namespace DocumentManager
                     MessageBox.Show("Folder or file is not selected");
                     return;
                 }
+                if (txtDocumentSerialNumber.Text == "" || !Utility.IsNumber(txtDocumentSerialNumber.Text))
+                {
+                    MessageBox.Show("Please give valid serial number");
+                    return;
+                }
+                string refName= txtRef.Text;
                 Contact contact = (Contact)gridContacts.SelectedItem;
                 Field field = new Field()
                 {
-                    refNo = _ReferenceNumber,
-                    companyName = cmbCompanies.SelectedItem.ToString(),
+                    refNo = txtRef.Text,
+                    companyName = getCurrentSelectedCompany().companyName,
                     address1 = txtAddress1.Text,
                     address2 = txtAddress2.Text,
                     address3 = txtAddress3.Text,
@@ -571,21 +633,31 @@ namespace DocumentManager
                     phone = txtPhone.Text,
                     date = txtDate.Text,
                     state = txtState.Text,
-                    stateCode = (txtStateCode.Text=="")?0:int.Parse(txtStateCode.Text),
+                    stateCode = (txtStateCode.Text == "") ? 0 : int.Parse(txtStateCode.Text),
                     contactName = contact.contact_name,
                     contactEmail = contact.contact_email,
-                    contactPhone = contact.contact_phone
+                    contactPhone = contact.contact_phone,
+                    gstNo = txtGSTNo.Text,
                 };
                 ReportProcessor rp = new ReportProcessor();
-                string companyName = cmbCompanies.SelectedItem.ToString();
-                if (!Directory.Exists(saveFolderPath + companyName))
+                string saveFolder=txtDocumentFolderPath.Text+"\\"+getCurrentSelectedCompany().companyName;
+
+                if(File.Exists(txtSaveFilePath.Text))
                 {
-                    Directory.CreateDirectory(saveFolderPath + companyName);
+                    MessageBox.Show("File Exists previously, either change serial number or delete file from " + txtSaveFilePath.Text);
                 }
-                rp.GenerateReport(field, documentFolderPath + cmbTemplateFolders.Text + "\\" + cmbTemplateFiles.Text, saveFolderPath + companyName + "\\" + cmbTemplateFolders.Text + _ReferenceNumber + _SerialNumber + ".xlsx");
+                //Trace.WriteLine("save file path" + txtSaveFilePath.Text);
+                //Trace.WriteLine("Template file path" + txtTemplateFilePath.Text);
+                if (!Directory.Exists(saveFolder))
+                {
+                    Directory.CreateDirectory(saveFolder);
+                }
+                rp.GenerateReport(field, txtTemplateFilePath.Text, txtSaveFilePath.Text);
+                Trace.WriteLine("Report Generated");
+                SaveInDb(txtSaveFilePath.Text);
                 if (btnOpenToggle.IsChecked == true)
                 {
-                    Process.Start(saveFolderPath +companyName+"\\"+ cmbTemplateFolders.Text + _ReferenceNumber + _SerialNumber + ".xlsx");
+                    Process.Start(txtSaveFilePath.Text);
                 }
             }
             catch (Exception ex)
@@ -593,33 +665,90 @@ namespace DocumentManager
                 MessageBox.Show("Exception in generating report : " + ex.Message);
             }
         }
-
-        private void btnOpenFolder_Click(object sender, RoutedEventArgs e)
+        private void SaveInDb(string documentSavePath)
+        {
+            DataLayer dl = new DataLayer();
+            Response res = dl.GetDoctypeIdByName(cmbTemplateFolders.SelectedItem.ToString());
+            int docTypeId = 0;
+            if (res.success)
+            {
+                docTypeId = (int)res.body;
+            }
+            else if(res.isException)
+            {
+                MessageBox.Show(res.exception);
+                return;
+            }
+            //int docTypeId = Int32.Parse(dl.GetDoctypeIdByName(cmbTemplateFolders.SelectedItem.ToString()).ToString());
+            Trace.WriteLine("Doctype id "+docTypeId);
+            DLDocument dlDocument = new DLDocument()
+            {
+                companyId = getCurrentSelectedCompany().companyId,
+                docTypeId = docTypeId,
+                documentId = Int32.Parse(txtDocumentSerialNumber.Text),
+                documentPath = documentSavePath,
+                sender = txtRef.Text
+            };
+            res = dl.AddDocument(dlDocument);
+            if (res.success)
+            {
+                // document added
+                //MessageBox.Show("Document added");
+                populateDocumentsDataGrid(cmbTemplateFolders.SelectedItem.ToString());
+            }
+            else if (res.isException)
+            {
+                MessageBox.Show("Exception in adding document : "+res.exception);
+            }
+        }
+        private void UpdateSettingsTable()
+        {
+            DataLayer dl = new DataLayer();
+            Settings setting = new Settings();
+            setting.docRoot = txtDocumentFolderPath.Text;
+            setting.refName = txtRef.Text;
+            Trace.WriteLine(setting.refName);
+            setting.templateRoot = txtTemplateFolderPath.Text;
+            Response res = dl.UpdateSettings(setting);
+            if(res.success)
+            {
+                Trace.WriteLine("Settings Saved");
+                //settings updated
+            }
+            else if(res.isException)
+            {
+                MessageBox.Show(res.exception);
+            }
+        }
+        private void btnSelectTemplateFolder_Click(object sender, RoutedEventArgs e)
         {
             CommonOpenFileDialog dialog = new CommonOpenFileDialog();
             //dialog.InitialDirectory = "C:\\Users";
             dialog.IsFolderPicker = true;
             if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
             {
-                txtFolderPath.Text = dialog.FileName;
+                txtTemplateFolderPath.Text = dialog.FileName;
+                UpdateSettingsTable();
             }
             populateTemplateFoldersCmb();
+        }
 
-            //SaveFileDialog fileDialog = new SaveFileDialog()
-            //{
-            //    Title = "Save As",
+        private void btnSelectDocumentFolder_Click(object sender,RoutedEventArgs e)
+        {
+            CommonOpenFileDialog dialog = new CommonOpenFileDialog();
+            //dialog.InitialDirectory = "C:\\Users";
+            dialog.IsFolderPicker = true;
+            if (dialog.ShowDialog() == CommonFileDialogResult.Ok)
+            {
+                txtDocumentFolderPath.Text = dialog.FileName;
+                UpdateSettingsTable();
+            }
+            PopulateFilePaths();
+        }
 
-            //    CheckFileExists = true,
-            //    CheckPathExists = true,
-
-            //    DefaultExt = "xsl",
-            //    Filter = "xsl files (*.xsl)|*.xsl",
-            //};
-            //if (fileDialog.ShowDialog() == true)
-            //{
-            //    lblSaveFolderPath.Content=fileDialog.FileName;
-            //}
-
+        private void btnSaveSettings_Click(object sender,RoutedEventArgs e)
+        {
+            UpdateSettingsTable();
         }
 
         private void RefreshDate_Click(object sender, RoutedEventArgs e)
@@ -631,10 +760,10 @@ namespace DocumentManager
         {
             try
             {
-                Process.Start(documentFolderPath);
+                Process.Start(txtTemplateFolderPath.Text);
             }catch(Exception ex)
             {
-                Trace.WriteLine(ex.Message);
+                MessageBox.Show(ex.Message);
             }
         }
 
@@ -757,9 +886,29 @@ namespace DocumentManager
                 txtContactName.Text = contact.contact_name;
                 txtContactEmail.Text = contact.contact_email;
                 txtContactPhone.Text = contact.contact_phone;
-            }catch(Exception exception)
+            }
+            catch (Exception exception)
             {
                 MessageBox.Show("Exception in contact selection changed " + exception.Message);
+            }
+        }
+        /// <summary>
+        /// This will run first time when grid contact initialized, and we have to hide some contact from our object, so we use this event
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void gridContacts_Loaded(object sender, RoutedEventArgs e)
+        {
+            gridContacts.Columns[0].Visibility = Visibility.Collapsed;
+            gridContacts.Columns[1].Visibility = Visibility.Collapsed;
+            setAllColumnsOfSameWidth();
+        }
+        private void setAllColumnsOfSameWidth()
+        {
+            foreach (var column in gridContacts.Columns)
+            {
+                column.MinWidth = column.ActualWidth;
+                column.Width = new DataGridLength(1, DataGridLengthUnitType.Star);
             }
         }
 
@@ -795,6 +944,97 @@ namespace DocumentManager
                 MessageBox.Show(res.exception);
             }
         }
+
+        private async void populateDocumentsDataGrid(string docTypeName)
+        {
+            await Task.Delay(1000);
+            DataLayer dl = new DataLayer();
+            //Trace.WriteLine(cmbTemplateFolders.SelectedItem.ToString());
+            Response res = dl.GetDocuementsByDocType(docTypeName);
+            if(res.success)
+            {
+                List<Document> documents = (List<Document>)res.body;
+                gridDocuments.ItemsSource = documents;
+                setAllColumnsOfSameWidth();
+                if (gridDocuments.Columns.Count > 3)
+                {
+                    gridDocuments.Columns[3].Width = new DataGridLength(3, DataGridLengthUnitType.Star);
+                }
+                if (documents != null && documents.Count > 0)
+                {
+                    txtDocumentSerialNumber.Text = (documents[0].SNo + 1).ToString();
+                }
+                else txtDocumentSerialNumber.Text = "1";
+                //gridDocuments.Columns[1].Visibility = Visibility.Collapsed;
+            }
+            else if(res.isException)
+            {
+                MessageBox.Show(res.exception);
+            }
+        }
+
+        private void gridDocuments_AutoGeneratingColumns(object sender, DataGridAutoGeneratingColumnEventArgs e)
+        {
+            if (e.PropertyDescriptor is PropertyDescriptor descriptor)
+            {
+                e.Column.Header = descriptor.DisplayName ?? descriptor.Name;
+            }
+        }
+
+        private void gridContacts_AutoGeneratingColumn(object sender, DataGridAutoGeneratingColumnEventArgs e)
+        {
+            if (e.PropertyDescriptor is PropertyDescriptor descriptor)
+            {
+                e.Column.Header = descriptor.DisplayName ?? descriptor.Name;
+            }
+        }
+
+        private void gridDocuments_Loaded(object sender, RoutedEventArgs e)
+        {
+            setAllColumnsOfSameWidth();
+            if (gridDocuments.Columns.Count > 3)
+            {
+                gridDocuments.Columns[3].Width = new DataGridLength(3, DataGridLengthUnitType.Star);
+            }
+        }
+
+        private void txtDocumentSerialNumber_TextChanged(object sender, TextChangedEventArgs e)
+        {
+            PopulateFilePaths();
+        }
+
+        private void btnDeleteDocument_Click(object sender, RoutedEventArgs e)
+        {
+            DataLayer dl = new DataLayer();
+            if(gridDocuments.SelectedIndex==-1 || cmbTemplateFolders.SelectedIndex==-1)
+            {
+                MessageBox.Show("No Document selected, select a document which you want to delete.");
+                return;
+            }
+            Document document = (Document)gridDocuments.SelectedItem;
+            Response res = dl.DeleteDocument(document.SNo, cmbTemplateFolders.SelectedItem.ToString());
+            if(res.success)
+            {
+                // document deleted
+                populateDocumentsDataGrid(cmbTemplateFolders.SelectedItem.ToString());
+
+            }
+            else if(res.isException)
+            {
+                MessageBox.Show(res.exception);
+            }
+        }
+
+        private void btnOpenDocumentFolder_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                Process.Start(txtDocumentFolderPath.Text);
+            }catch(Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
     }
     public class Field
     {
@@ -812,6 +1052,7 @@ namespace DocumentManager
         public string contactName { set; get; }
         public string contactEmail { set; get; }
         public string contactPhone { set; get; }
+        public string gstNo { set; get; }
     }
     public class ReportProcessor
     {
@@ -822,46 +1063,40 @@ namespace DocumentManager
         OleDbDataReader reader = null;
         public void GenerateReport(Field field, string reportName, string saveFileName)
         {
-            try
+            string documentName = System.IO.Path.GetFileName(System.IO.Path.GetDirectoryName(reportName));
+            connection = DatabaseConnection.GetConnection();
+            connection.Open();
+            //string sqlString = "select * from qryAddress where companyName=@NAME";
+            command = new OleDbCommand("select * from qryDocumentFields where doctype_name=@DOCUMENT", connection);
+            //command.Parameters.AddWithValue("@DOCUMENT", "GST Tax Invoice");
+            //Trace.WriteLine("Report Name "+reportName);
+            //Trace.WriteLine("Directory name "+System.IO.Path.GetFileName(System.IO.Path.GetDirectoryName(reportName)));
+            command.Parameters.AddWithValue("@DOCUMENT", documentName);
+            reader = command.ExecuteReader();
+            FileStream fileStream = new FileStream(reportName, FileMode.Open, FileAccess.Read);
+            IWorkbook workbook = null;
+            string extension = Utility.GetExtension(reportName);
+            if (extension == ".xlsx") workbook = new XSSFWorkbook(fileStream);
+            else if (extension == ".xls")
             {
-                string documentName = System.IO.Path.GetFileName(System.IO.Path.GetDirectoryName(reportName));
-                connection = DatabaseConnection.GetConnection();
-                connection.Open();
-                //string sqlString = "select * from qryAddress where companyName=@NAME";
-                command = new OleDbCommand("select * from qryDocumentFields where doctype_name=@DOCUMENT", connection);
-                //command.Parameters.AddWithValue("@DOCUMENT", "GST Tax Invoice");
-                //Trace.WriteLine("Report Name "+reportName);
-                //Trace.WriteLine("Directory name "+System.IO.Path.GetFileName(System.IO.Path.GetDirectoryName(reportName)));
-                command.Parameters.AddWithValue("@DOCUMENT", documentName);
-                reader = command.ExecuteReader();
-                FileStream fileStream = new FileStream(reportName, FileMode.Open, FileAccess.Read);
-                IWorkbook workbook = null;
-                if (reportName.IndexOf(".xlsx") > 0) workbook = new XSSFWorkbook(fileStream);
-                else if (reportName.IndexOf(".xls") > 0) workbook = new HSSFWorkbook(fileStream);
-                ISheet sheet = null;
-                while (reader.Read())
-                {
-                    if (sheet == null) sheet = workbook.GetSheet(reader["field_sheet"].ToString());
-                    IRow currRow = sheet.GetRow(int.Parse(reader["field_row"].ToString()) - 1);
-                    ICell cell = currRow.GetCell(int.Parse(reader["field_column"].ToString()) - 1);
-                    SetValue(cell, reader["field_name"].ToString(), field);
-                    //Trace.WriteLine(cell.ToString() + " " + (cell.RowIndex + 1) + " " + (cell.ColumnIndex + 1));
-                    //Trace.WriteLine("Field name : " + reader["field_name"]);
-                    //Trace.WriteLine("Field row : " + reader["field_row"]);
-                    //Trace.WriteLine("Field column : " + reader["field_column"]);
-                }
-                using (var fileData = new FileStream(saveFileName, FileMode.Create))
-                {
-                    workbook.Write(fileData);
-                    workbook.Close();
-                }
-                //string filePath = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "Solution.xls");
-                connection.Close();
+                throw new DAOException(extension + " files are not supported. Please change them to .xlsx file format. \n Thanks");
             }
-            catch (Exception ex)
+            else throw new DAOException("File format " + extension + " not supported.");
+            ISheet sheet = null;
+            while (reader.Read())
             {
-                MessageBox.Show("Exception while generating report : " + ex.Message);
+                if (sheet == null) sheet = workbook.GetSheet(reader["field_sheet"].ToString());
+                IRow currRow = sheet.GetRow(int.Parse(reader["field_row"].ToString()) - 1);
+                ICell cell = currRow.GetCell(int.Parse(reader["field_column"].ToString()) - 1);
+                SetValue(cell, reader["field_name"].ToString(), field);
             }
+            using (var fileData = new FileStream(saveFileName, FileMode.Create))
+            {
+                workbook.Write(fileData);
+                workbook.Close();
+            }
+            //string filePath = System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.Desktop), "Solution.xls");
+            connection.Close();
         }
         public void SetValue(ICell cell, string fieldName, Field field)
         {
@@ -878,6 +1113,8 @@ namespace DocumentManager
             if (fieldName.Equals("State")) cell.SetCellValue(field.state);
             if (fieldName.Equals("Contact Name")) cell.SetCellValue(field.contactName);
             if (fieldName.Equals("Contact Phone")) cell.SetCellValue(field.contactPhone);
+            if (fieldName.Equals("State Code")) cell.SetCellValue(field.stateCode);
+            if (fieldName.Equals("GST No")) cell.SetCellValue(field.gstNo);
             // Add for contact email also if required
             //if (fieldName.Equals("State Code")) cell.SetCellValue(field.stateCode);
         }

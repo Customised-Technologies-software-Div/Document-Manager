@@ -41,6 +41,7 @@ namespace DocumentManager.com.dl
                 else
                 {
                     res.success = false;
+                    res.isException = true;
                     res.exception = "Some error occured, try closing window, contact admin";
                 }
             }
@@ -196,6 +197,35 @@ namespace DocumentManager.com.dl
             }
             return res;
         }
+        public Response GetCompanyByCompanyId(int companyId)
+        {
+            Response res = new Response();
+            string sqlString = "";
+            try
+            {
+                OleDbConnection connection = DatabaseConnection.GetConnection();
+                connection.Open();
+                sqlString = "select * from companylist where company_id=@1";
+                OleDbCommand command = new OleDbCommand(sqlString, connection);
+                command.Parameters.AddWithValue("@1", companyId);
+                OleDbDataReader reader = command.ExecuteReader();
+                reader.Read();
+                Company company2 = new Company();
+                company2.companyId = Int32.Parse(reader["company_id"].ToString());
+                company2.companyName = reader["company_name"].ToString();
+                res.success = true;
+                res.isException = false;
+                res.body = company2;
+            }
+            catch (Exception ex)
+            {
+                res.success = false;
+                res.isException = true;
+                res.exception = ex.Message;
+            }
+            return res;
+
+        }
         public Response GetAllCompanies()
         {
             // here we send response as list<string> in return, when success status is true
@@ -258,6 +288,7 @@ namespace DocumentManager.com.dl
                 else
                 {
                     res.success = false;
+                    res.isException = true;
                     res.exception = "Some error occured, try closing window, contact admin";
                 }
             }
@@ -463,6 +494,7 @@ namespace DocumentManager.com.dl
                 else
                 {
                     res.success = false;
+                    res.isException = true;
                     res.exception = "Some error occured, try closing window, contact admin";
                 }
             }
@@ -646,6 +678,7 @@ namespace DocumentManager.com.dl
                 else
                 {
                     res.success = false;
+                    res.isException = true;
                     res.exception = "Some error occured, try closing window, contact admin";
                 }
             }
@@ -748,7 +781,7 @@ namespace DocumentManager.com.dl
             {
                 connection = DatabaseConnection.GetConnection();
                 connection.Open();
-                sqlString = "select * from contactlist where company_id=@1";
+                sqlString = "select contact_id,contact_name,contact_email,contact_phone from contactlist where company_id=@1";
                 command = new OleDbCommand(sqlString, connection);
                 command.Parameters.AddWithValue("@1", companyID);
                 reader = command.ExecuteReader();
@@ -756,7 +789,6 @@ namespace DocumentManager.com.dl
                 while (reader.Read())
                 {
                     Contact contact = new Contact();
-                    contact.companyId = companyID;
                     contact.contactId = Int32.Parse(reader["contact_id"].ToString());
                     contact.contact_name = reader["contact_name"].ToString();
                     contact.contact_email = reader["contact_email"].ToString();
@@ -803,6 +835,235 @@ namespace DocumentManager.com.dl
                 res.exception = ex.Message;
             }
             return res;
+        }
+        // CRUD Operation on DocType Table
+        public Response GetDoctypeIdByName(string docTypeName)
+        {
+            Response res = new Response();
+            OleDbConnection connection2 = null;
+            OleDbCommand command2 = null;
+            OleDbDataReader reader2 = null;
+            string sqlString = "";
+            try
+            {
+                connection2 = DatabaseConnection.GetConnection();
+                connection2.Open();
+                sqlString = "select doctype_id from doctypes where doctype_name=@1";
+                command2 = new OleDbCommand(sqlString, connection2);
+                command2.Parameters.AddWithValue("@1", docTypeName);
+                reader2 = command2.ExecuteReader();
+                reader2.Read();
+                int docTypeId = Int32.Parse(reader2["doctype_id"].ToString());
+                res.success = true;
+                res.isException = false;
+                res.body = docTypeId;
+            }catch(Exception exception)
+            {
+                res.success = false;
+                res.isException = true;
+                res.exception = exception.Message;
+            }
+            return res;
+        }
+        // CRUD Operation on Documents table
+        public Response AddDocument(DLDocument dlDocument)
+        {
+            Response res = new Response();
+            try
+            {
+                connection = DatabaseConnection.GetConnection();
+                connection.Open();
+                string sqlString = "insert into documents  (document_id, doctype_id, company_id, document_path, sender)  values(@1,@2,@3,@4,@6)";
+                command = new OleDbCommand(sqlString, connection);
+                command.Parameters.AddWithValue("@1", dlDocument.documentId);
+                command.Parameters.AddWithValue("@2", dlDocument.docTypeId);
+                command.Parameters.AddWithValue("@3", dlDocument.companyId);
+                command.Parameters.AddWithValue("@4", dlDocument.documentPath);
+                command.Parameters.AddWithValue("@6", dlDocument.sender);
+
+                reader = command.ExecuteReader();
+                if (reader.RecordsAffected >= 0)
+                {
+                    res.success = true;
+                    res.isException = false;
+                }
+                else
+                {
+                    res.success = false;
+                    res.isException = true;
+                    res.exception = "Some error occured, try closing window, contact admin";
+                }
+            }
+            catch (Exception exception)
+            {
+                res.success = false;
+                res.isException = true;
+                res.exception = exception.Message;
+            }
+            return res;
+        }
+
+        public Response DeleteDocument(int serialNumber,string docTypeName)
+        {
+            Response res = new Response();
+            int docTypeId =0;
+            try
+            {
+                Response res2 = GetDoctypeIdByName(docTypeName);
+                if(res2.success)
+                {
+                    docTypeId = Int32.Parse(res2.body.ToString());
+                }
+                else if(res2.isException)
+                {
+                    throw new DAOException(res2.exception);
+                }
+
+                connection = DatabaseConnection.GetConnection();
+                connection.Open();
+                string sqlString = "delete from documents where document_id=@1 and doctype_id=@2";
+                command = new OleDbCommand(sqlString, connection);
+                command.Parameters.AddWithValue("@1", serialNumber);
+                command.Parameters.AddWithValue("@2", docTypeId);
+                
+                int recordsDeleted = command.ExecuteNonQuery();
+                if (recordsDeleted > 0)
+                {
+                    res.success = true;
+                    res.isException = false;
+                }
+                else
+                {
+                    res.success = false;
+                    res.isException = true;
+                    res.exception = "Some error occured, try closing window, or contact admin";
+                }
+            }
+            catch(Exception ex)
+            {
+                res.success = false;
+                res.isException = true;
+                res.exception = ex.Message;
+            }
+            return res;
+        }
+
+        public Response GetDocuementsByDocType(string docTypeName)
+        {
+            Response res = new Response();
+            string sqlString = "";
+            try
+            {
+                List<Document> documents = new List<Document>();
+                connection = DatabaseConnection.GetConnection();
+                connection.Open();
+                sqlString = "select doc.document_id, doc.document_date, doc.sender, doc.rev_no,  companylist.company_name from ((documents as doc inner join companylist on companylist.company_id = doc.company_id) inner join doctypes on doc.doctype_id = doctypes.doctype_id) where doctypes.doctype_name = @1 order by doc.document_id DESC";
+                command = new OleDbCommand(sqlString, connection);
+                command.Parameters.AddWithValue("@1",docTypeName);
+                OleDbDataReader reader2 = command.ExecuteReader();
+                while (reader2.Read())
+                {
+                    Document document = new Document()
+                    {
+                        SNo = Int32.Parse(reader2["document_id"].ToString()),
+                        RNo = Int32.Parse(reader2["rev_no"].ToString()),
+                        sender = reader2["sender"].ToString(),
+                    };
+                    //System.Diagnostics.Trace.WriteLine("Company Id is " + reader2["company_name"]);
+                    document.companyName = reader2["company_name"].ToString();
+                    DateTime dt = Convert.ToDateTime(reader2["document_date"]);
+                    //String formattedDate = String.Format("dd/MM/yyyy HH/mm/ss", dt);
+                    document.date = dt.ToString("dd-MM-yyyy HH:mm:ss");
+                    documents.Add(document);
+                }
+                res.success = true;
+                res.isException = false;
+                res.body = documents;
+            }
+            catch (Exception ex)
+            {
+                res.success = false;
+                res.isException = true;
+                res.exception = ex.Message;
+            }
+            return res;
+        }
+
+        //CRUD operations on settings table
+        public Response GetSettings()
+        {
+            Response res = new Response();
+            OleDbConnection connection2 = null;
+            OleDbCommand command2 = null;
+            OleDbDataReader reader2 = null;
+            try
+            {
+                connection2 = DatabaseConnection.GetConnection();
+                connection2.Open();
+                string sqlString = "select * from settings";
+                command2 = new OleDbCommand(sqlString, connection2);
+                reader2 = command2.ExecuteReader();
+                reader2.Read();
+                Settings setting = new Settings();
+                setting.docRoot = reader2["svalue"].ToString();
+                reader2.Read();
+                setting.refName = reader2["svalue"].ToString();
+                reader2.Read();
+                setting.templateRoot = reader2["svalue"].ToString();
+                res.success = true;
+                res.isException = false;
+                res.body = setting;
+            }catch(Exception ex)
+            {
+                res.success = false;
+                res.isException = true;
+                res.exception = ex.Message;
+            }
+            return res;
+        }
+        public Response UpdateSettings(Settings setting)
+        {
+            Response res = new Response();
+            OleDbConnection connection2 = null;
+            OleDbCommand command2 = null;
+            OleDbDataReader reader2 = null;
+            try
+            {
+                connection2 = DatabaseConnection.GetConnection();
+                connection2.Open();
+                string sqlString = "update settings set svalue=@1 where setting=@2";
+                command2 = new OleDbCommand(sqlString, connection2);
+                command2.Parameters.AddWithValue("@1", setting.docRoot);
+                command2.Parameters.AddWithValue("@2", "DocRoot");
+                int recordsUpdated=command2.ExecuteNonQuery();
+                command2 = new OleDbCommand(sqlString, connection2);
+                command2.Parameters.AddWithValue("@1", setting.refName);
+                command2.Parameters.AddWithValue("@2", "RefText");
+                int recordsUpdated2 = command2.ExecuteNonQuery();
+                command2 = new OleDbCommand(sqlString, connection2);
+                command2.Parameters.AddWithValue("@1", setting.templateRoot);
+                command2.Parameters.AddWithValue("@2", "TemplateRoot");
+                int recordsUpdated3 = command2.ExecuteNonQuery();
+                if (recordsUpdated > 0)
+                {
+                    res.success = true;
+                    res.isException = false;
+                }
+                else
+                {
+                    res.success = false;
+                    res.isException = true;
+                    res.exception = "Some error occured, try closing window, or contact admin";
+                }
+            }
+            catch (Exception ex)
+            {
+                res.success = false;
+                res.isException = true;
+                res.exception = ex.Message;
+            }
+            return res;
+
         }
     }
 }

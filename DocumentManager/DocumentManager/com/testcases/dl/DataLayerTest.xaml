@@ -5,29 +5,36 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:DocumentManager"
         mc:Ignorable="d"
-        Title="DataLayerTest" Height="450" Width="800">
+        Title="DataLayerTest" Height="600" Width="800">
     <Grid>
         <StackPanel Orientation="Vertical">
-        <TextBox x:Name="txtCompanyName" HorizontalAlignment="Left" Height="23"  TextWrapping="Wrap"  VerticalAlignment="Top" Width="120"/>
-        <Button Content="AddCompany" HorizontalAlignment="Left"  VerticalAlignment="Top" Width="90" Click="Button_Click"/>
-        <Button Content="Edit" HorizontalAlignment="Left"  VerticalAlignment="Top" Width="75" Click="tempBtnEditClick"/>
-        <TextBox x:Name="txtCompanyId" Visibility="Collapsed" />
-        <Button Content="Delete" HorizontalAlignment="Left"  VerticalAlignment="Top" Width="75" Click="tempBtnDeleteClick"/>
-        <Button Content="Get All" Click="tempBtnGetAll" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75"/>
-        <Button Content="Add Address" HorizontalAlignment="Left" VerticalAlignment="Top" Width="140" RenderTransformOrigin="1.003,0.787" Click="tempBtnAddAddressClick"/>
-        <Button Content="Delete Address" HorizontalAlignment="Left" VerticalAlignment="Top" Width="115" Click="tempBtnDeleteAddressClick"/>
-        <Button Content="Get Address by company Id" HorizontalAlignment="Left" VerticalAlignment="Top" Width="185" Height="22" Click="tempBtnGetAddressByCompanyId" />
-        <Button Content="Get Address by Address Id" HorizontalAlignment="Left" VerticalAlignment="Top" Width="187" Click="tempBtnGetAddressById"/>
-        <Button Content="Add City" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Click="tempBtnAddCityClick"/>
-        <Button Content="Get all Cities" HorizontalAlignment="Left" VerticalAlignment="Top" Width="96" Click="tempBtnGetAllCitiesClick"/>
-        <Button Content="Edit City" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Click="tempBtnEditCityClick"/>
-        <Button Content="Delete City" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Click="tempBtnDeleteCityClick"/>
-        <Button Content="Get City By Name" HorizontalAlignment="Left" VerticalAlignment="Top" Width="130" Click="tempBtnGetCityByNameClick"/>
+            <TextBox x:Name="txtCompanyName" HorizontalAlignment="Left" Height="23"  TextWrapping="Wrap"  VerticalAlignment="Top" Width="120"/>
+            <Button Content="AddCompany" HorizontalAlignment="Left"  VerticalAlignment="Top" Width="90" Click="Button_Click"/>
+            <Button Content="Edit" HorizontalAlignment="Left"  VerticalAlignment="Top" Width="75" Click="tempBtnEditClick"/>
+            <TextBox x:Name="txtCompanyId" Visibility="Collapsed" />
+            <Button Content="Delete" HorizontalAlignment="Left"  VerticalAlignment="Top" Width="75" Click="tempBtnDeleteClick"/>
+            <Button Content="Get All" Click="tempBtnGetAll" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75"/>
+            <Button Content="Get Company By Company Id" Click="tempBtnGetCompanyByCompanyIdClick"></Button>
+            <Button Content="Add Address" HorizontalAlignment="Left" VerticalAlignment="Top" Width="140" RenderTransformOrigin="1.003,0.787" Click="tempBtnAddAddressClick"/>
+            <Button Content="Delete Address" HorizontalAlignment="Left" VerticalAlignment="Top" Width="115" Click="tempBtnDeleteAddressClick"/>
+            <Button Content="Get Address by company Id" HorizontalAlignment="Left" VerticalAlignment="Top" Width="185" Height="22" Click="tempBtnGetAddressByCompanyId" />
+            <Button Content="Get Address by Address Id" HorizontalAlignment="Left" VerticalAlignment="Top" Width="187" Click="tempBtnGetAddressById"/>
+            <Button Content="Add City" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Click="tempBtnAddCityClick"/>
+            <Button Content="Get all Cities" HorizontalAlignment="Left" VerticalAlignment="Top" Width="96" Click="tempBtnGetAllCitiesClick"/>
+            <Button Content="Edit City" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Click="tempBtnEditCityClick"/>
+            <Button Content="Delete City" HorizontalAlignment="Left" VerticalAlignment="Top" Width="75" Click="tempBtnDeleteCityClick"/>
+            <Button Content="Get City By Name" HorizontalAlignment="Left" VerticalAlignment="Top" Width="130" Click="tempBtnGetCityByNameClick"/>
 
-        <Button Content="Add Contact" HorizontalAlignment="Left" VerticalAlignment="Top" Width="95" Click="tempBtnAddContactClick"/>
-        <Button Content="Edit contact" HorizontalAlignment="Left" VerticalAlignment="Top" Width="90" Click="tempBtnEditContactClick"/>
-        <Button Content="Delete contact" HorizontalAlignment="Left"  VerticalAlignment="Top" Width="94" Click="tempBtnDeleteContactClick"/>
-        <Button Content="Get contact by company id" HorizontalAlignment="Left"  VerticalAlignment="Top" Width="170" Click="tempBtnGetContactByCompanyIdClick"/>
+            <Button Content="Add Contact" HorizontalAlignment="Left" VerticalAlignment="Top" Width="95" Click="tempBtnAddContactClick"/>
+            <Button Content="Edit contact" HorizontalAlignment="Left" VerticalAlignment="Top" Width="90" Click="tempBtnEditContactClick"/>
+            <Button Content="Delete contact" HorizontalAlignment="Left"  VerticalAlignment="Top" Width="94" Click="tempBtnDeleteContactClick"/>
+            <Button Content="Get contact by company id" HorizontalAlignment="Left"  VerticalAlignment="Top" Width="170" Click="tempBtnGetContactByCompanyIdClick"/>
+            <Button Content="GetDocTypeIdByName" Click="tempBtnGetDocTypeIdClick"></Button>
+            <Button Content="GetSettings" Click="tempBtnGetSettingsClick"></Button>
+            <Button Content="UpdateSettings" Click="tempBtnUpdateSettingsClick"></Button>
+            <Button Content="GetDocuments" Click="tempBtnGetDocumentsClick" Margin="0,0,-0.4,0"/>
+            <Button Content="Add Document" Click="tempBtnAddDocumentClick"></Button>
+            <Button Content="Delete Document" Click="tempBtnDeleteDocumentClick"></Button>
         </StackPanel>
     </Grid>
 </Window>

@@ -454,5 +454,119 @@ namespace DocumentManager
                 MessageBox.Show(res.exception);
             }
         }
+        private void tempBtnGetCompanyByCompanyIdClick(object sender,RoutedEventArgs e)
+        {
+            DataLayer dl = new DataLayer();
+            Response res = dl.GetCompanyByCompanyId(Int32.Parse(txtCompanyName.Text));
+            if(res.success)
+            {
+                Company company = (Company)res.body;
+                MessageBox.Show("Company Name is " + company.companyName);
+            }
+            else if(res.isException)
+            {
+                MessageBox.Show(res.exception);
+            }
+        }
+
+        private void tempBtnGetDocTypeIdClick(object sender, RoutedEventArgs e)
+        {
+            DataLayer dl = new DataLayer();
+            // In company name text field we will enter docTypeName
+            Response res = dl.GetDoctypeIdByName(txtCompanyName.Text);
+            if (res.success)
+            {
+                MessageBox.Show(res.body.ToString());
+            }
+            else if(res.isException)
+            {
+                MessageBox.Show(res.exception);
+            }
+        }
+        private void tempBtnGetSettingsClick(object sender,RoutedEventArgs e)
+        {
+            DataLayer dl = new DataLayer();
+            Response res = dl.GetSettings();
+            if(res.success)
+            {
+                Settings settings = (Settings)res.body;
+                MessageBox.Show("Root : " + settings.docRoot + " Ref Name : " + settings.refName);
+            }
+            else if(res.isException)
+            {
+                MessageBox.Show(res.exception);
+            }
+        }
+        private void tempBtnUpdateSettingsClick(object sender,RoutedEventArgs e)
+        {
+            DataLayer dl = new DataLayer();
+            Settings settings = new Settings();
+            settings.docRoot = @"c:\abcd";
+            settings.refName = "vinay";
+            Response res = dl.UpdateSettings(settings);
+            if (res.success)
+            {
+                MessageBox.Show("Records Updated");
+            }
+            else if (res.isException)
+            {
+                MessageBox.Show(res.exception);
+            }
+        }
+        private void tempBtnGetDocumentsClick(object sender, RoutedEventArgs e)
+        {
+            DataLayer dl = new DataLayer();
+            Response res = dl.GetDocuementsByDocType("RDC");
+            if (res.success)
+            {
+                List<Document> documents = (List<Document>)res.body;
+                for (int i = 0; i < documents.Count; i++)
+                {
+                    Trace.WriteLine(documents[i].SNo + " " + documents[i].date + " " + documents[i].companyName);
+                }
+            }
+            else if (res.isException)
+            {
+                MessageBox.Show(res.exception);
+            }
+        }
+        private void tempBtnAddDocumentClick(object sender,RoutedEventArgs e)
+        {
+            DLDocument dlDocument = new DLDocument()
+            {
+                companyId = 1111,
+                docTypeId = 71,
+                documentDate = DateTime.Now,
+                documentId = 2,
+                documentPath = "\\vinay1\\rdc.xlsx",
+                rev_no = 0,
+                sender = "V"
+            };
+            DataLayer dl = new DataLayer();
+            Response res=dl.AddDocument(dlDocument);
+            if(res.success)
+            {
+                // document added
+                MessageBox.Show("Document added");
+            }
+            else if(res.isException)
+            {
+                MessageBox.Show(res.exception);
+            }
+        }
+
+        private void tempBtnDeleteDocumentClick(object sender,RoutedEventArgs e)
+        {
+            DataLayer dl = new DataLayer();
+            Response res = dl.DeleteDocument(1,"vinay1");
+            if(res.success)
+            {
+                MessageBox.Show("Document deleted");
+            }
+            else if(res.isException)
+            {
+                MessageBox.Show(res.exception);
+            }
+        }
     }
 }

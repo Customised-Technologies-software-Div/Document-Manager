@@ -109,6 +109,9 @@
     </Compile>
     <Compile Include="com\exception\DAOException.cs" />
     <Compile Include="com\dl\DataLayer.cs" />
+    <Compile Include="com\poco\DLDocument.cs" />
+    <Compile Include="com\poco\Document.cs" />
+    <Compile Include="com\poco\Settings.cs" />
     <Compile Include="com\testcases\dl\DataLayerTest.xaml.cs">
       <DependentUpon>DataLayerTest.xaml</DependentUpon>
     </Compile>
@@ -204,6 +207,8 @@
   <ItemGroup>
     <Resource Include="images\remove.png" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Resource Include="images\save-image.png" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

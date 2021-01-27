@@ -1,5 +1,4 @@
-﻿//using Microsoft.Office.Interop.Excel;
-using Microsoft.Win32;
+﻿using Microsoft.Win32;
 using NPOI.HSSF.UserModel;
 using NPOI.SS.UserModel;
 using System;
@@ -33,9 +32,8 @@ namespace DocumentManager
     /// </summary>
     public partial class FieldsCreator : System.Windows.Window
     {
-        private string xpsFileName = "";
         //private string path = @"E:\Vinay\Training\Document Manager\DocMgr Files\Envelop\Envelop.xls";
-        private string path = @"E:\Vinay\Training\Document Manager\DocMgr Files\GST Tax Invoice\GST Tax Invoice 21 Jul 2017.xlsx";
+        //private string path = @"E:\Vinay\Training\Document Manager\DocMgr Files\GST Tax Invoice\GST Tax Invoice 21 Jul 2017.xlsx";
         private DataTable _DataTable;
         private int _DeleteCellIndex = 0;
         private string _RootPath = "";
@@ -47,18 +45,24 @@ namespace DocumentManager
         }
         private void populateCmbFieldNames()
         {
-            OleDbConnection connection = DatabaseConnection.GetConnection();
-            connection.Open();
-            string sqlString = "select distinct field_name from FIELDS";
-            OleDbCommand command = new OleDbCommand(sqlString, connection);
-            OleDbDataReader reader = command.ExecuteReader();
-            while (reader.Read())
+            //OleDbConnection connection = DatabaseConnection.GetConnection();
+            //connection.Open();
+            //string sqlString = "select distinct field_name from FIELDS";
+            //OleDbCommand command = new OleDbCommand(sqlString, connection);
+            //OleDbDataReader reader = command.ExecuteReader();
+            //while (reader.Read())
+            //{
+            //    System.Diagnostics.Trace.WriteLine(reader["field_name"].ToString());
+            //    cmbFieldNames.Items.Add(reader["field_name"].ToString());
+            //}
+            //connection.Close();
+            List<string> fieldNames = new List<string>
             {
-                System.Diagnostics.Trace.WriteLine(reader["field_name"].ToString());
-                cmbFieldNames.Items.Add(reader["field_name"].ToString());
-            }
-            connection.Close();
+                "Address 1","Address2","Address 3","Address Block","City","Company Name","Contact Name","Contact Phone","Date","Phone","Pincode","Ref No","State","State Code","GST No"
+            };
+            cmbFieldNames.ItemsSource = fieldNames;
         }
+
         private void populateFieldDataGrid()
         {
             _DataTable = new DataTable();
@@ -99,8 +103,7 @@ namespace DocumentManager
                 if (openFileDialog.ShowDialog() == true)
                 {
                     txtSelectTemplate.Text = openFileDialog.FileName;
-                    path = txtSelectTemplate.Text;
-                    reoGridControl.Load(path, unvell.ReoGrid.IO.FileFormat.Excel2007);
+                    reoGridControl.Load(txtSelectTemplate.Text, unvell.ReoGrid.IO.FileFormat.Excel2007);
                     var sheet = reoGridControl.CurrentWorksheet;
                     sheet.CellMouseDown += sheet_CellMouseDown;
                 }
@@ -290,7 +293,7 @@ namespace DocumentManager
                     }
                 }
                 Directory.CreateDirectory(_RootPath + "\\" + templateName);
-                File.Copy(path, _RootPath + "\\" + templateName + "\\" + templateName + ".xlsx");
+                File.Copy(txtSelectTemplate.Text, _RootPath + "\\" + templateName + "\\" + templateName + ".xlsx");
                 MessageBox.Show("Information saved and template is created");
                 connection.Close();
                 this.Close();

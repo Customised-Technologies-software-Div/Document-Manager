@@ -11,7 +11,7 @@ namespace DocumentManager
     {
         public static OleDbConnection GetConnection()
         {
-            return new OleDbConnection(@"Provider=Microsoft.Jet.OLEDB.4.0;Data Source=E:\Vinay\Training\Document Manager\DocMgr Files\main.mdb");
+            return new OleDbConnection(@"Provider=Microsoft.Jet.OLEDB.4.0;Data Source=E:\Vinay\Training\Document Manager\main.mdb");
         }
     }
 }

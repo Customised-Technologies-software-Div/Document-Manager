@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -8,6 +9,17 @@ namespace DocumentManager.com.Utility
 {
     public class Utility
     {
+        public static string GetExtension(string filePath)
+        {
+            FileInfo fi = new FileInfo(filePath);
+            return fi.Extension;
+        }
+
+        public static bool IsNumber(string str)
+        {
+            return str.All(Char.IsDigit);
+        }
+
         public static string ConvertNumbertoWords(int number)
         {
             if (number == 0)
