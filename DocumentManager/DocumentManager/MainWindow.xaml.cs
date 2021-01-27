@@ -280,11 +280,11 @@ namespace DocumentManager
             }
             else
             {
-                btn.Content = "Add";
+
                 if(txtCompanyName.Text=="" || txtCompanyName.Text.Length==0)
                 {
                     MessageBox.Show("Company name cannot be empty");
-                    setCompanyEditMode();
+                    setCompanyAddMode();
                     return;
                 }
                 DataLayer dl = new DataLayer();
@@ -296,6 +296,7 @@ namespace DocumentManager
                     Thread.Sleep(1000);
                     populateCompaniesCmb();
                     setCompanyViewMode();
+                    btn.Content = "Add";
                 }
                 else if(res.isException)
                 {

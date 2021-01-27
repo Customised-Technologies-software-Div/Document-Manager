@@ -5,93 +5,130 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:DocumentManager"
         mc:Ignorable="d"
-        Title="MainWindow"  WindowState="Maximized" Width="1500" Height="800" >
+        Title="MainWindow" WindowStartupLocation="CenterScreen" Width="1500" Height="700" >
+    <Window.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="/DocumentManager;component/css/ButtonsStyle.xaml"></ResourceDictionary>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </Window.Resources>
     <Grid >
-        <ComboBox x:Name="cmbCompanies" HorizontalAlignment="Left" Margin="151,15,0,0" VerticalAlignment="Top" Width="163"/>
+        <Grid.Background>
+            <LinearGradientBrush EndPoint="0.5,1" MappingMode="RelativeToBoundingBox" StartPoint="0.5,0">
+                <GradientStop Color="#FFFDFCFB"/>
+                <GradientStop Color="#FFE2D1C3" Offset="1"/>
+            </LinearGradientBrush>
+        </Grid.Background>
+        <Label Content="Company Name" HorizontalAlignment="Left" Margin="26,12,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.282,0.667" Width="113" Height="28"/>
+        <ComboBox x:Name="cmbCompanies" HorizontalAlignment="Left" Margin="151,15,0,0" VerticalAlignment="Top" Width="209"/>
+        <Button x:Name="btnAddCompany" Content="Add" HorizontalAlignment="Left" Margin="30,49,0,0" VerticalAlignment="Top" Style="{StaticResource AddButtonStyle}" Click= "btnAddCompanyDetails_Click" >
+        </Button>
         <TextBox x:Name="txtCompanyName" HorizontalAlignment="Left" Margin="167,15,0,0" VerticalAlignment="Top" Width="163" Visibility="Collapsed"></TextBox>
-        <Button Content="Generate" HorizontalAlignment="Left" Margin="30,586,0,0" VerticalAlignment="Top" Width="155" Click="Generate_Click"/>
+        <Button x:Name="btnEditCompany" Content="Save"  HorizontalAlignment="Left" Margin="103,49,0,0" VerticalAlignment="Top"  Click="btnEditCompanyDetails_Click" Style="{StaticResource UpdateButtonStyle}">
+        </Button>
+        <Button x:Name="btnDeleteCompany" Content="Delete" HorizontalAlignment="Left" Margin="180,49,0,0" VerticalAlignment="Top"  Click="btnDeleteCompanyDetails_Click" Style="{StaticResource DeleteButtonStyle}"/>
+        <Button x:Name="btnCancelCompany" Content="Cancel" HorizontalAlignment="Left" Margin="255,49,0,0" VerticalAlignment="Top" IsEnabled="False" Click="btnCancelCompany_Click" Style="{StaticResource CancelButtonStyle}"/>
+        <Button HorizontalAlignment="Left" Margin="330,49,0,0" VerticalAlignment="Top" Width="30" Height="22" Click="btnRefreshCompaniesCmb" Style="{StaticResource RefreshButtonStyle}" >
+            <Image Source="/images/refresh-icon.png" Height="19" Width="15"></Image>
+        </Button>
+        <Label x:Name="txtCompanyStatus" FontSize="10" HorizontalAlignment="Left" Margin="92,82,0,0" VerticalAlignment="Top" Width="268" Height="19" Foreground="blue"/>
         <Label Content="Address Line 1" HorizontalAlignment="Left" Margin="30,106,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.282,0.667"/>
-        <TextBox x:Name="txtAddress1" HorizontalAlignment="Left" Height="23" Margin="162,113,0,0" TextWrapping="Wrap"  VerticalAlignment="Top" Width="163"/>
+        <TextBox x:Name="txtAddress1" HorizontalAlignment="Left" Height="23" Margin="162,113,0,0" TextWrapping="Wrap"  VerticalAlignment="Top" Width="198">
+            <TextBox.Background>
+                <LinearGradientBrush EndPoint="0.5,1" MappingMode="RelativeToBoundingBox" StartPoint="0.5,0">
+                    <GradientStop Color="#80C7C7C7" Offset="1"/>
+                    <GradientStop Color="#A6D7D7D7" Offset="0.008"/>
+                    <GradientStop Color="#FFFFFEE1" Offset="0.883"/>
+                    <GradientStop Color="#FFFFFEE1" Offset="0.125"/>
+                    <GradientStop Color="#A6D7D7D7" Offset="0.971"/>
+                </LinearGradientBrush>
+            </TextBox.Background>
+        </TextBox>
         <Label Content="Address Line 2" HorizontalAlignment="Left" Margin="30,141,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.282,0.667"/>
-        <TextBox x:Name="txtAddress2" HorizontalAlignment="Left" Height="23" Margin="162,147,0,0" TextWrapping="Wrap"  VerticalAlignment="Top" Width="163"/>
-        <TextBox x:Name="txtAddress3" HorizontalAlignment="Left" Height="23" Margin="162,187,0,0" TextWrapping="Wrap"  VerticalAlignment="Top" Width="163"/>
+        <TextBox x:Name="txtAddress2" HorizontalAlignment="Left" Height="23" Margin="162,147,0,0" TextWrapping="Wrap"  VerticalAlignment="Top" Width="198"/>
         <Label Content="Address Line 3" HorizontalAlignment="Left" Margin="30,181,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.282,0.667"/>
-        <Label Content="Company Name&#xD;&#xA;" HorizontalAlignment="Left" Margin="26,12,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.282,0.667" Width="113" Height="28"/>
-
-        <Label Content="Pincode" HorizontalAlignment="Left" Margin="30,295,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.282,0.667"/>
-        <Label Content="State" HorizontalAlignment="Left" Margin="30,258,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.282,0.667"/>
+        <TextBox x:Name="txtAddress3" HorizontalAlignment="Left" Height="23" Margin="162,187,0,0" TextWrapping="Wrap"  VerticalAlignment="Top" Width="198"/>
         <Label Content="City" HorizontalAlignment="Left" Margin="30,224,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.282,0.667" />
-        <TextBox x:Name="txtCity"  HorizontalAlignment="Left" Height="23" Margin="162,224,0,0" TextWrapping="Wrap"  VerticalAlignment="Top" Width="103" LostFocus="txtCityFocusChanged_Click" />
-        <TextBox x:Name="txtState" HorizontalAlignment="Left" Height="23" Margin="162,264,0,0" TextWrapping="Wrap"  VerticalAlignment="Top" Width="103"/>
-        <TextBox x:Name="txtPincode" HorizontalAlignment="Left" Height="23" Margin="162,302,0,0" TextWrapping="Wrap"  VerticalAlignment="Top" Width="163" RenderTransformOrigin="0.492,0.565"/>
-        <TextBox x:Name="txtPhone"  HorizontalAlignment="Left" Height="23" Margin="162,344,0,0" TextWrapping="Wrap"  VerticalAlignment="Top" Width="163"/>
+        <TextBox x:Name="txtCity"  HorizontalAlignment="Left" Height="23" Margin="162,224,0,0" TextWrapping="Wrap"  VerticalAlignment="Top" Width="128" LostFocus="txtCityFocusChanged_Click" />
+        <Label Content="State" HorizontalAlignment="Left" Margin="30,258,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.282,0.667"/>
+        <TextBox x:Name="txtState" HorizontalAlignment="Left" Height="23" Margin="162,264,0,0" TextWrapping="Wrap"  VerticalAlignment="Top" Width="128"/>
+        <Label Content="Pincode" HorizontalAlignment="Left" Margin="30,295,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.282,0.667"/>
+        <TextBox x:Name="txtPincode" HorizontalAlignment="Left" Height="23" Margin="162,302,0,0" TextWrapping="Wrap"  VerticalAlignment="Top" Width="198" RenderTransformOrigin="0.492,0.565"/>
+        <TextBox x:Name="txtPhone"  HorizontalAlignment="Left" Height="23" Margin="162,344,0,0" TextWrapping="Wrap"  VerticalAlignment="Top" Width="198"/>
         <Label Content="Phone Number" HorizontalAlignment="Left" Margin="30,338,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.282,0.667"/>
         <Label Content="State Code" HorizontalAlignment="Left" Margin="30,380,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.282,0.667"/>
-        <TextBox x:Name="txtStateCode" HorizontalAlignment="Left" Height="23" Margin="162,386,0,0" TextWrapping="Wrap"  VerticalAlignment="Top" Width="163" RenderTransformOrigin="0.492,0.565" Text="0"/>
+        <TextBox x:Name="txtStateCode" HorizontalAlignment="Left" Height="23" Margin="162,386,0,0" TextWrapping="Wrap"  VerticalAlignment="Top" Width="198" RenderTransformOrigin="0.492,0.565" Text="0"/>
         <Label Content="GST No." HorizontalAlignment="Left" Margin="30,421,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.282,0.667"/>
-        <TextBox x:Name="txtGSTNo" HorizontalAlignment="Left" Height="23" Margin="162,421,0,0" TextWrapping="Wrap"  VerticalAlignment="Top" Width="163" RenderTransformOrigin="0.492,0.565"/>
-        <!--<TextBox x:Name="txtDate" HorizontalAlignment="Left" Height="23" Margin="536,21,0,0" TextWrapping="Wrap"  VerticalAlignment="Top" Width="163"/>-->
-        <DatePicker Height="25" HorizontalAlignment="Left" Margin="500,19,0,0" Name="txtDate" VerticalAlignment="Top" Width="199"  />
+        <TextBox x:Name="txtGSTNo" HorizontalAlignment="Left" Height="23" Margin="162,421,0,0" TextWrapping="Wrap"  VerticalAlignment="Top" Width="198" RenderTransformOrigin="0.492,0.565"/>
+        <Button FontSize="18" HorizontalAlignment="Left" Margin="300,224,0,0" VerticalAlignment="Top"  Style="{StaticResource AddButtonStyle}" Click="btnAddCity_Click">
+            <Image Source="/images/Add-icon.png"></Image>
+        </Button>
+        <Button Content="Manage" HorizontalAlignment="Left" Margin="300,264,0,0" VerticalAlignment="Top" Width="60px" Height="25px" Style="{StaticResource PrimaryButtonStyle}" Click="btnManageCities_Click"/>
+        <Button x:Name="btnPrev"  HorizontalAlignment="Left" Margin="75,460,0,0" VerticalAlignment="Top" Width="75" Height="25" Style="{StaticResource PrimaryButtonStyle}" Click="btnPrevAddress_Click" IsEnabled="False">
+            <Image Source="/images/Left-arrow.png"></Image>
+        </Button>
+        <TextBox x:Name="txtAddressInfo" HorizontalAlignment="Left" Height="23" Margin="165,461,0,0" TextWrapping="Wrap"  VerticalAlignment="Top" Width="35" Text="0 / 0" IsReadOnly="True"/>
+        <Button x:Name="btnNext" HorizontalAlignment="Left" Margin="215,460,0,0" VerticalAlignment="Top" Width="75" Height="25" Click="btnNextAddress_Click" IsEnabled="False" Style="{StaticResource PrimaryButtonStyle}">
+            <Image Source="/images/Right-arrow.png"></Image>
+        </Button>
+        <Button x:Name="btnAddAddress" Content="Add" HorizontalAlignment="Left" Margin="30,515,0,0" VerticalAlignment="Top" Width="70" Style="{StaticResource AddButtonStyle}" Click="btnAddAddressDetails_Click"/>
+        <Button x:Name="btnSaveAddress" Content="Save" HorizontalAlignment="Left" Margin="115,515,0,0" Width="70" VerticalAlignment="Top"  Style="{StaticResource UpdateButtonStyle}" Click="btnSaveAddressDetails_Click"/>
+        <Button x:Name="btnDeleteAddress" Content="Delete" HorizontalAlignment="Left" Margin="200,515,0,0" Width="70" VerticalAlignment="Top" Style="{StaticResource DeleteButtonStyle}" Click="btnDeleteAddress_Click"/>
+        <Button x:Name="btnCancelAddress" Content="Cancel" HorizontalAlignment="Left" Margin="285,515,0,0" Width="70" VerticalAlignment="Top" Style="{StaticResource CancelButtonStyle}" Click="btnCancelAddressModification_Click"/>
 
-        <Label Content="Date" HorizontalAlignment="Left" Margin="404,15,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.282,0.667"/>
-        <DataGrid x:Name="gridContacts" HorizontalAlignment="Left" Height="195" Margin="360,163,0,0" VerticalAlignment="Top" Width="405" SelectionChanged="gridContacts_SelectionChanged" AutoGenerateColumns="True" AutoGeneratingColumn="gridContacts_AutoGeneratingColumn" Loaded="gridContacts_Loaded" IsReadOnly="True"/>
-        <TextBox x:Name="txtTemplateFolderPath" IsReadOnly="True" IsReadOnlyCaretVisible="True" HorizontalAlignment="Left" Margin="402,75,0,0" VerticalAlignment="Top" Width="333"/>
-        <Button Content="..." HorizontalAlignment="Left" Margin="743,75,0,0" VerticalAlignment="Top" Width="26" Click="btnSelectTemplateFolder_Click"/>
-        <ComboBox x:Name="cmbTemplateFolders" HorizontalAlignment="Left" Margin="404,119,0,0" VerticalAlignment="Top" Width="120" RenderTransformOrigin="0.55,0.435"/>
-        <ComboBox SelectionChanged="cmbTemplateFilesSelectionChanged" x:Name="cmbTemplateFiles" HorizontalAlignment="Left" Margin="544,119,0,0" VerticalAlignment="Top" Width="211"/>
-        <Button HorizontalAlignment="Left" Margin="724,21,0,0" VerticalAlignment="Top"  Height="20" Width="20" Click="RefreshDate_Click">
-            <Image Source="/images/refresh.png" />
-        </Button>
-        <CheckBox x:Name="btnOpenToggle" Content="Open" HorizontalAlignment="Left" Margin="200,586,0,0" VerticalAlignment="Top" IsChecked="False"/>
-        <Button Content="Create New Template" HorizontalAlignment="Left" Margin="575,472,0,0" VerticalAlignment="Top" Width="165" Click="btnCreateNewTemplate_Click"/>
-        <Button Content="Open Template Folder"  HorizontalAlignment="Left" Margin="396,472,0,0" VerticalAlignment="Top" Width="159" Click="btnOpenTemplateFolder_Click"/>
-        <Button x:Name="btnAddCompany" Content="Add" HorizontalAlignment="Left" Margin="26,49,0,0" VerticalAlignment="Top" Width="52" Click="btnAddCompanyDetails_Click" />
-        <Button x:Name="btnDeleteCompany" Content="Delete" HorizontalAlignment="Left" Margin="151,49,0,0" VerticalAlignment="Top" Width="63" Click="btnDeleteCompanyDetails_Click"/>
-        <Button x:Name="btnEditCompany" Content="Edit" HorizontalAlignment="Left" Margin="89,49,0,0" VerticalAlignment="Top" Width="50" Click="btnEditCompanyDetails_Click"/>
-        <Button x:Name="btnCancelCompany" Content="Cancel" HorizontalAlignment="Left" Margin="239,49,0,0" VerticalAlignment="Top" Width="75" IsEnabled="False" Click="btnCancelCompany_Click"/>
-        <Button Content="Test Data Layer" HorizontalAlignment="Left" Margin="30,630,0,0" VerticalAlignment="Top" Width="133" Click="btnDataLayerTestClick"/>
+
+
+        <Label Content="Template " HorizontalAlignment="Left" Margin="385,15,0,0" VerticalAlignment="Top" Height="35" Width="70"/>
+        <TextBox x:Name="txtTemplateFolderPath" IsReadOnly="True" IsReadOnlyCaretVisible="True" HorizontalAlignment="Left" Margin="460,15,0,0" VerticalAlignment="Top" Width="295" Height="38"/>
+        <Button Content="..." HorizontalAlignment="Left" Margin="768,15,0,0" VerticalAlignment="Top"  Click="btnSelectTemplateFolder_Click" Style="{StaticResource BrowseButtonStyle}" />
+        <Button Content="Open Template Folder"  HorizontalAlignment="Left" Margin="385,73,0,0" VerticalAlignment="Top" Width="190" Click="btnOpenTemplateFolder_Click" Style="{StaticResource PrimaryButtonStyle}"/>
+        <Button Content="Create New Template" HorizontalAlignment="Left" Margin="595,73,0,0" VerticalAlignment="Top" Width="199" Click="btnCreateNewTemplate_Click" Style="{StaticResource PrimaryButtonStyle}"/>
+        <ComboBox x:Name="cmbTemplateFolders" HorizontalAlignment="Left" Margin="389,126,0,0" VerticalAlignment="Top" Width="156" RenderTransformOrigin="0.55,0.435"/>
+        <ComboBox SelectionChanged="cmbTemplateFilesSelectionChanged" x:Name="cmbTemplateFiles" HorizontalAlignment="Left" Margin="570,126,0,0" VerticalAlignment="Top" Width="224"/>
+        <DataGrid x:Name="gridContacts" HorizontalAlignment="Left" Height="277" Margin="392,173,0,0" VerticalAlignment="Top" Width="405" SelectionChanged="gridContacts_SelectionChanged" AutoGenerateColumns="True" AutoGeneratingColumn="gridContacts_AutoGeneratingColumn" Loaded="gridContacts_Loaded" IsReadOnly="True"/>
+
         <Label x:Name="lblCompanyId" Visibility="Collapsed"/>
-        <Button x:Name="btnPrev" Content="Prev" HorizontalAlignment="Left" Margin="50,508,0,0" VerticalAlignment="Top" Width="75" Click="btnPrevAddress_Click" IsEnabled="False"/>
-        <TextBox x:Name="txtAddressInfo" HorizontalAlignment="Left" Height="23" Margin="140,509,0,0" TextWrapping="Wrap"  VerticalAlignment="Top" Width="35" Text="0 / 0" IsReadOnly="True"/>
-        <Button x:Name="btnNext" Content="Next" HorizontalAlignment="Left" Margin="190,508,0,0" VerticalAlignment="Top" Width="75" Click="btnNextAddress_Click" IsEnabled="False"/>
-        <Label x:Name="txtCompanyStatus" FontSize="10" HorizontalAlignment="Left" Margin="42,90,0,0" VerticalAlignment="Top" Width="283" Height="11" Foreground="blue"/>
-        <Button HorizontalAlignment="Left" Margin="329,15,0,0" VerticalAlignment="Top" Width="30" Height="25" Click="btnRefreshCompaniesCmb">
-            <Image Source="/images/refresh.png" Height="19" Width="15"></Image>
-        </Button>
-        <Button x:Name="btnAddAddress" Content="Add" HorizontalAlignment="Left" Margin="50,548,0,0" VerticalAlignment="Top" Width="50" Click="btnAddAddressDetails_Click"/>
-        <Button x:Name="btnSaveAddress" Content="Save" HorizontalAlignment="Left" Margin="113,548,0,0" VerticalAlignment="Top" Width="50" Click="btnSaveAddressDetails_Click"/>
-        <Button x:Name="btnDeleteAddress" Content="Delete" HorizontalAlignment="Left" Margin="180,548,0,0" VerticalAlignment="Top" Width="50" Click="btnDeleteAddress_Click"/>
-        <Button x:Name="btnCancelAddress" Content="Cancel" HorizontalAlignment="Left" Margin="250,548,0,0" VerticalAlignment="Top" Width="75" RenderTransformOrigin="2.308,0.444" Click="btnCancelAddressModification_Click"/>
-        <Button Content="+" FontSize="18" HorizontalAlignment="Left" Margin="300,222,0,0" VerticalAlignment="Top" Width="25" Height="29" Click="btnAddCity_Click"/>
-        <Button Content="Manage" HorizontalAlignment="Left" Margin="285,264,0,0" VerticalAlignment="Top" Width="55" Click="btnManageCities_Click"/>
-        <TextBox HorizontalAlignment="Left" Height="23" Margin="360,409,0,0" TextWrapping="Wrap"  VerticalAlignment="Top" Width="125" x:Name="txtContactName"/>
-        <TextBox HorizontalAlignment="Left" Height="23" Margin="500,409,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="130" RenderTransformOrigin="-0.042,0.652" x:Name="txtContactEmail"/>
-        <TextBox HorizontalAlignment="Left" Height="23" Margin="645,409,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" RenderTransformOrigin="-0.042,0.652" x:Name="txtContactPhone"/>
-        <Button Content="Save" HorizontalAlignment="Left" Margin="500,443,0,0" VerticalAlignment="Top" Width="55" Click="btnSaveContactDetails_Click"/>
-        <Button Content="Delete" HorizontalAlignment="Left" Margin="575,443,0,0" VerticalAlignment="Top" Width="55" Click="btnDeleteContactDetails_Click"/>
-        <Label x:Name="txtContactStatus" Foreground="Green" HorizontalAlignment="Left" Margin="645,440,0,0" VerticalAlignment="Top" Width="120" Height="25"/>
-        <Button Content="Add" HorizontalAlignment="Left" Margin="440,443,0,0" VerticalAlignment="Top" Width="39" Click="btnAddContact_Click"/>
-        <Label Content="Name" HorizontalAlignment="Left" Margin="360,366,0,0" VerticalAlignment="Top"/>
-        <Label Content="Phone" HorizontalAlignment="Left" Margin="645,366,0,0" VerticalAlignment="Top" RenderTransformOrigin="4.38,0.931"/>
-        <Label Content="Email" HorizontalAlignment="Left" Margin="500,366,0,0" VerticalAlignment="Top"/>
-        <DataGrid x:Name="gridDocuments" Height="279" Margin="832,190,55.6,0" VerticalAlignment="Top" AutoGenerateColumns="True" AutoGeneratingColumn="gridDocuments_AutoGeneratingColumns" Loaded="gridDocuments_Loaded" IsReadOnly="True"/>
-        <Label Content="Templates Folder " HorizontalAlignment="Left" Margin="404,44,0,0" VerticalAlignment="Top" Height="26"/>
-        <TextBox x:Name="txtDocumentSerialNumber" HorizontalAlignment="Left" Height="23" Margin="965,515,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" TextChanged="txtDocumentSerialNumber_TextChanged" />
-        <Label Content="S.No." HorizontalAlignment="Left" Margin="877,509,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.579,-0.181"/>
-        <TextBox x:Name="txtRef" HorizontalAlignment="Left" Height="23" Margin="1230,515,0,0" TextWrapping="Wrap" Text="B" VerticalAlignment="Top" Width="120"/>
-        <Label Content="Ref" HorizontalAlignment="Left" Margin="1157,509,0,0" VerticalAlignment="Top"/>
-        <Button HorizontalAlignment="Left" Margin="1370,515,0,0" VerticalAlignment="Top" Width="25" Height="23" Click="btnSaveSettings_Click">
+
+        <Label Content="Name" HorizontalAlignment="Left" Margin="392,467,0,0" VerticalAlignment="Top"/>
+        <Label Content="Email" HorizontalAlignment="Left" Margin="532,467,0,0" VerticalAlignment="Top"/>
+        <Label Content="Phone" HorizontalAlignment="Left" Margin="677,467,0,0" VerticalAlignment="Top" RenderTransformOrigin="4.38,0.931"/>
+        <TextBox HorizontalAlignment="Left" Height="23" Margin="392,510,0,0" TextWrapping="Wrap"  VerticalAlignment="Top" Width="125" x:Name="txtContactName"/>
+        <TextBox HorizontalAlignment="Left" Height="23" Margin="532,510,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="130" RenderTransformOrigin="-0.042,0.652" x:Name="txtContactEmail"/>
+        <TextBox HorizontalAlignment="Left" Height="23" Margin="677,510,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" RenderTransformOrigin="-0.042,0.652" x:Name="txtContactPhone"/>
+        <Button Content="Add" HorizontalAlignment="Left" Margin="392,550,0,0" VerticalAlignment="Top" Width="80" Style="{StaticResource AddButtonStyle}" Click="btnAddContact_Click"/>
+        <Button Content="Save" HorizontalAlignment="Left" Margin="482,550,0,0" VerticalAlignment="Top" Width="80" Style="{StaticResource UpdateButtonStyle}" Click="btnSaveContactDetails_Click"/>
+        <Button Content="Delete" HorizontalAlignment="Left" Margin="572,550,0,0" VerticalAlignment="Top" Width="80" Style="{StaticResource DeleteButtonStyle}" Click="btnDeleteContactDetails_Click"/>
+        <Label x:Name="txtContactStatus" Foreground="Green" HorizontalAlignment="Left" Margin="672,550,0,0" VerticalAlignment="Top" Width="125" Height="22"/>
+        <DataGrid x:Name="gridDocuments" Height="279" Margin="842,173,45.6,0" VerticalAlignment="Top" AutoGenerateColumns="True" AutoGeneratingColumn="gridDocuments_AutoGeneratingColumns" Loaded="gridDocuments_Loaded" IsReadOnly="True"/>
+        <Button Content="Delete Document" HorizontalAlignment="Left" Margin="1195,467,0,0" VerticalAlignment="Top" Width="145" Click="btnDeleteDocument_Click" Style="{StaticResource DeleteButtonStyle}"/>
+        <TextBox x:Name="txtDocumentSerialNumber" HorizontalAlignment="Left" Height="23" Margin="915,506,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="120" TextChanged="txtDocumentSerialNumber_TextChanged" />
+        <Label Content="S.No." HorizontalAlignment="Left" Margin="842,504,0,0" VerticalAlignment="Top" RenderTransformOrigin="0.579,-0.181"/>
+        <TextBox x:Name="txtRef" HorizontalAlignment="Left" Height="23" Margin="1115,506,0,0" TextWrapping="Wrap" Text="B" VerticalAlignment="Top" Width="120"/>
+        <Label Content="Ref" HorizontalAlignment="Left" Margin="1052,504,0,0" VerticalAlignment="Top" Height="25"/>
+        <Button HorizontalAlignment="Left" Margin="1255,506,0,0" VerticalAlignment="Top" Width="30" Height="23" Click="btnSaveSettings_Click" Style="{StaticResource UpdateButtonStyle}">
             <Image Source="/images/save-image.png" Height="20" Width="25" ></Image>
         </Button>
-        <TextBox x:Name="txtTemplateFilePath" HorizontalAlignment="Left" Height="39" Margin="965,565,0,0" TextWrapping="Wrap"  VerticalAlignment="Top" Width="473"/>
-        <Label Content="Template File Path" HorizontalAlignment="Left" Margin="810,566,0,0" VerticalAlignment="Top"/>
-        <TextBox x:Name="txtSaveFilePath" HorizontalAlignment="Left" Height="39" Margin="965,626,0,0" TextWrapping="Wrap"  VerticalAlignment="Top" Width="473"/>
-        <Label Content="Document File Path" HorizontalAlignment="Left" Margin="810,627,0,0" VerticalAlignment="Top"/>
-        <Label Content="Document Root Folder" HorizontalAlignment="Left" Margin="820,25,0,0" VerticalAlignment="Top"/>
-        <TextBox x:Name="txtDocumentFolderPath" HorizontalAlignment="Left" Height="29" Margin="990,25,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="335"/>
-        <Button Content="..." HorizontalAlignment="Left" Margin="1357,22,0,0" VerticalAlignment="Top" Width="23" Click="btnSelectDocumentFolder_Click" />
-        <Button Content="Delete Document" HorizontalAlignment="Left" Margin="1270,477,0,0" VerticalAlignment="Top" Width="125" Click="btnDeleteDocument_Click"/>
-        <Button Content="Open" HorizontalAlignment="Left" Margin="1400,28,0,0" VerticalAlignment="Top" Width="67" Click="btnOpenDocumentFolder_Click" RenderTransformOrigin="0.373,0.787"/>
+        <TextBox x:Name="txtTemplateFilePath" HorizontalAlignment="Left" Height="39" Margin="1016,120,0,0" TextWrapping="Wrap"  VerticalAlignment="Top" Width="432"/>
+        <Label Content="Template File Path" HorizontalAlignment="Left" Margin="842,126,0,0" VerticalAlignment="Top"/>
+        <TextBox x:Name="txtSaveFilePath" HorizontalAlignment="Left" Height="39" Margin="1016,65,0,0" TextWrapping="Wrap"  VerticalAlignment="Top" Width="432"/>
+        <Label Content="Document File Path" HorizontalAlignment="Left" Margin="842,66,0,0" VerticalAlignment="Top"/>
+        <Label Content="Document Root Folder" HorizontalAlignment="Left" Margin="841,15,0,0" VerticalAlignment="Top" Height="39" Width="149"/>
+        <TextBox x:Name="txtDocumentFolderPath" HorizontalAlignment="Left" Height="35" Margin="1015,15,0,0" TextWrapping="Wrap" VerticalAlignment="Top" Width="310"/>
+        <Button Content="..." HorizontalAlignment="Left" Margin="1340,15,0,0" VerticalAlignment="Top" Style="{StaticResource BrowseButtonStyle}" Click="btnSelectDocumentFolder_Click" />
+        <Button Content="Open" HorizontalAlignment="Left" Margin="1380,15,0,0" VerticalAlignment="Top" Width="67" Click="btnOpenDocumentFolder_Click" RenderTransformOrigin="0.373,0.787" Height="35" Style="{StaticResource PrimaryButtonStyle}"/>
+        <Label  HorizontalAlignment="Left" Margin="1360,467,0,0" VerticalAlignment="Top" Width="87"/>
+        <Label Content="Date" HorizontalAlignment="Left" Margin="842,463,0,0" VerticalAlignment="Top" RenderTransformOrigin="-0.282,0.667" Width="50"/>
+
+        <DatePicker Height="25" HorizontalAlignment="Left" Margin="915,467,0,0" Name="txtDate" VerticalAlignment="Top" Width="199"  />
+        <Button HorizontalAlignment="Left" Margin="1132,467,0,0" VerticalAlignment="Top"  Height="25" Width="28" Click="RefreshDate_Click" Style="{StaticResource RefreshButtonStyle}">
+            <Image Source="/images/Refresh-icon.png" />
+        </Button>
+
+        <Button Content="Generate" FontSize="30" HorizontalAlignment="Left" Margin="852,570,0,0" VerticalAlignment="Top" Width="218" Click="Generate_Click" Height="50" Background="#FF8FE34D"/>
+        <CheckBox x:Name="btnOpenToggle" Content="Open" HorizontalAlignment="Left" Margin="1087,584,0,0" VerticalAlignment="Top" IsChecked="False"/>
+        <Button Content="Test Data Layer" HorizontalAlignment="Left" Margin="30,598,0,0" VerticalAlignment="Top" Width="133" Click="btnDataLayerTestClick"/>
+
         <!--<ToggleButton x:Name="btnOpenToggle"  HorizontalAlignment="Left" Margin="515,375,0,0" VerticalAlignment="Top" Width="30"  IsChecked="{Binding Status}"  Height="30" Style="{StaticResource OnOffToggleImageStyle}"/>-->
     </Grid>
 </Window>

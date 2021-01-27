@@ -95,6 +95,10 @@
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
+    <Page Include="css\ButtonsStyle.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="FieldsCreator.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
@@ -209,6 +213,20 @@
   </ItemGroup>
   <ItemGroup>
     <Resource Include="images\save-image.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="images\Add-icon.png" />
+    <Resource Include="images\cancel-icon.png" />
+    <Resource Include="images\delete-icon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="images\refresh-icon.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="images\Right-arrow.png" />
+  </ItemGroup>
+  <ItemGroup>
+    <Resource Include="images\Left-arrow.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
